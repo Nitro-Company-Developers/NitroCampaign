@@ -81,6 +81,7 @@ createApp({
   computed: {
     isValid() {
       // Validação baseada na rede selecionada
+      if (!this.form) return false;
       let requiredFilled;
       let combined;
       
@@ -104,6 +105,7 @@ createApp({
     },
     // Preview Campanhas conforme especificação
     preview() {
+      if (!this.form) return "";
       // Função para limpar espaços e hífens
       const cleanValue = (value) => {
         return String(value || "").replace(/[\s-]/g, "").toUpperCase();
@@ -199,6 +201,7 @@ createApp({
       return this.posicionamentos;
     },
     isValidAds() {
+      if (!this.formAds) return false;
       const copyValue = this.formAds.copy === "NAO_INFORMADO" ? "XX" : this.formAds.copy;
       const requiredFilled = this.formAds.sequencia !== null && this.formAds.sequencia !== undefined && copyValue && this.formAds.redeTrafego && this.formAds.oferta && this.formAds.adNum && this.formAds.variacao && this.formAds.hook && this.formAds.avatar;
       const combined = `${copyValue}${this.formAds.redeTrafego}${this.formAds.oferta}${this.formAds.adNum}${this.formAds.variacao}${this.formAds.hook}${this.formAds.avatar}${this.formAds.editor}`;
@@ -208,6 +211,7 @@ createApp({
       return Boolean(requiredFilled && noProhibited && sequenciaOk && adOk);
     },
     previewAds() {
+      if (!this.formAds) return "";
       // Função para limpar espaços e hífens
       const cleanValue = (value) => {
         return String(value || "").replace(/[\s-]/g, "").toUpperCase();
@@ -243,6 +247,7 @@ createApp({
       return parts.join("");
     },
     isValidNeomoonCampaign() {
+      if (!this.formNeomoonCampaign) return false;
       const gestorOk = /^[A-Z]{2}$/.test(this.formNeomoonCampaign.siglaGestor || "");
       const funilValue = this.formNeomoonCampaign.funil === "OUTRO"
         ? this.formNeomoonCampaign.funilOutro
@@ -288,6 +293,7 @@ createApp({
       return Boolean(requiredFilled && noProhibited);
     },
     previewNeomoonCampaign() {
+      if (!this.formNeomoonCampaign) return "";
       const cleanValue = (value) => String(value || "").replace(/[\s-]/g, "").toUpperCase();
       const withToken = (value) => {
         const val = cleanValue(value);
@@ -328,6 +334,7 @@ createApp({
       return parts.join("");
     },
     isValidNeomoonAds() {
+      if (!this.formNeomoonAds) return false;
       const copyValue = this.formNeomoonAds.copy === "OUTRO"
         ? this.formNeomoonAds.copyOutro
         : (this.formNeomoonAds.copy === "NAO_INFORMADO" ? "XX" : this.formNeomoonAds.copy);
@@ -353,6 +360,7 @@ createApp({
       return Boolean(requiredFilled && noProhibited && sequenciaOk);
     },
     previewNeomoonAds() {
+      if (!this.formNeomoonAds) return "";
       const cleanValue = (value) => String(value || "").replace(/[\s-]/g, "").toUpperCase();
       const withToken = (value) => {
         const val = cleanValue(value);
