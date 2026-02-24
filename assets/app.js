@@ -6,6 +6,7 @@ const PROHIBITED_TEST = /[|;:\/\\\[\]{}]/; // versão sem flag global (para test
 createApp({
   data() {
     return {
+      activeCompany: 'nitro',
       activeTab: 'campanhas',
       isDarkMode: true, // Começa no modo dark
       redes: ["Google", "Facebook", "TikTok"],
@@ -41,6 +42,38 @@ createApp({
         avatar: "",
         avatarTipo: "S", // S = não famoso, F = famoso
         editor: "",
+      },
+      formNeomoonCampaign: {
+        siglaGestor: "",
+        rede: "Google",
+        posicionamento: "YT",
+        bm: "",
+        ca: "",
+        oferta: "",
+        funil: "",
+        funilOutro: "",
+        pais: "US",
+        adNumCampaign: "",
+        estrutura: "",
+        estrategiaLance: "",
+        nomeCampanha: "",
+        dataDiaUmRaw: "",
+      },
+      formNeomoonAds: {
+        sequencia: null,
+        copy: "",
+        copyOutro: "",
+        redeTrafego: "FB",
+        oferta: "",
+        adNum: "",
+        angulo: "",
+        hook: "",
+        avatar: "",
+        avatarTipo: "IA",
+        tipoArquivo: "",
+        formato: "",
+        editor: "",
+        editorOutro: "",
       },
       copied: false,
     };
@@ -157,9 +190,18 @@ createApp({
       // Google tem posicionamento: YT, Display, Search
       return this.posicionamentos;
     },
+    neomoonPosicionamentosOptions() {
+      if (this.formNeomoonCampaign.rede === 'Facebook') {
+        return [];
+      } else if (this.formNeomoonCampaign.rede === 'TikTok') {
+        return ["N/A"];
+      }
+      return this.posicionamentos;
+    },
     isValidAds() {
-      const requiredFilled = this.formAds.sequencia !== null && this.formAds.sequencia !== undefined && this.formAds.copy && this.formAds.redeTrafego && this.formAds.oferta && this.formAds.adNum && this.formAds.variacao && this.formAds.hook && this.formAds.avatar;
-      const combined = `${this.formAds.copy}${this.formAds.redeTrafego}${this.formAds.oferta}${this.formAds.adNum}${this.formAds.variacao}${this.formAds.hook}${this.formAds.avatar}${this.formAds.editor}`;
+      const copyValue = this.formAds.copy === "NAO_INFORMADO" ? "XX" : this.formAds.copy;
+      const requiredFilled = this.formAds.sequencia !== null && this.formAds.sequencia !== undefined && copyValue && this.formAds.redeTrafego && this.formAds.oferta && this.formAds.adNum && this.formAds.variacao && this.formAds.hook && this.formAds.avatar;
+      const combined = `${copyValue}${this.formAds.redeTrafego}${this.formAds.oferta}${this.formAds.adNum}${this.formAds.variacao}${this.formAds.hook}${this.formAds.avatar}${this.formAds.editor}`;
       const noProhibited = !PROHIBITED_TEST.test(combined);
       const sequenciaOk = this.formAds.sequencia !== null && this.formAds.sequencia !== undefined && !isNaN(Number(this.formAds.sequencia));
       const adOk = this.formAds.adNum && this.formAds.adNum.trim().length > 0;
@@ -179,6 +221,7 @@ createApp({
       // Novo formato: [NÚMERO SEQUENCIAL][COPY][REDE][OFERTA][AD][V][H][A.S][EDITOR]
       const sequenciaValue = this.formAds.sequencia !== null && this.formAds.sequencia !== undefined ? String(this.formAds.sequencia) : "";
       const avatarComplete = this.formAds.avatar ? `${cleanValue(this.formAds.avatar)}.${this.formAds.avatarTipo}` : "";
+      const copyValue = this.formAds.copy === "NAO_INFORMADO" ? "XX" : this.formAds.copy;
       const editorValue = cleanValue(this.formAds.editor) || "XX"; // Se não informado, usa 'XX'
       
       // Mapear Google para YT na pré-visualização, mantendo outras redes inalteradas
@@ -187,7 +230,7 @@ createApp({
       // Cada campo com seus próprios colchetes
       const parts = [
         withToken(sequenciaValue),           // [NÚMERO SEQUENCIAL]
-        withToken(this.formAds.copy),        // [COPY]
+        withToken(copyValue),                // [COPY]
         withToken(redeDisplay),              // [REDE]
         withToken(this.formAds.oferta),      // [OFERTA]
         withToken(this.formAds.adNum),       // [AD]
@@ -197,6 +240,151 @@ createApp({
         withToken(editorValue),              // [EDITOR]
       ];
       
+      return parts.join("");
+    },
+    isValidNeomoonCampaign() {
+      const gestorOk = /^[A-Z]{2}$/.test(this.formNeomoonCampaign.siglaGestor || "");
+      const funilValue = this.formNeomoonCampaign.funil === "OUTRO"
+        ? this.formNeomoonCampaign.funilOutro
+        : this.formNeomoonCampaign.funil;
+
+      let requiredFilled;
+      let combined;
+
+      if (this.formNeomoonCampaign.rede === 'Facebook') {
+        requiredFilled = gestorOk
+          && this.formNeomoonCampaign.rede
+          && this.formNeomoonCampaign.bm
+          && this.formNeomoonCampaign.ca
+          && this.formNeomoonCampaign.oferta
+          && funilValue
+          && this.formNeomoonCampaign.adNumCampaign
+          && this.formNeomoonCampaign.estrutura
+          && this.formNeomoonCampaign.estrategiaLance
+          && this.formNeomoonCampaign.nomeCampanha
+          && this.formNeomoonCampaign.dataDiaUmRaw;
+
+        combined = `${this.formNeomoonCampaign.siglaGestor}${this.formNeomoonCampaign.bm}${this.formNeomoonCampaign.ca}${this.formNeomoonCampaign.oferta}${funilValue}${this.formNeomoonCampaign.adNumCampaign}${this.formNeomoonCampaign.estrutura}${this.formNeomoonCampaign.estrategiaLance}${this.formNeomoonCampaign.nomeCampanha}`;
+      } else {
+        const posicionamentoValue = this.formNeomoonCampaign.rede === 'TikTok'
+          ? 'N/A'
+          : this.formNeomoonCampaign.posicionamento;
+        requiredFilled = gestorOk
+          && this.formNeomoonCampaign.rede
+          && posicionamentoValue
+          && this.formNeomoonCampaign.ca
+          && this.formNeomoonCampaign.oferta
+          && funilValue
+          && this.formNeomoonCampaign.adNumCampaign
+          && this.formNeomoonCampaign.estrutura
+          && this.formNeomoonCampaign.estrategiaLance
+          && this.formNeomoonCampaign.nomeCampanha
+          && this.formNeomoonCampaign.dataDiaUmRaw;
+
+        combined = `${this.formNeomoonCampaign.siglaGestor}${posicionamentoValue}${this.formNeomoonCampaign.ca}${this.formNeomoonCampaign.oferta}${funilValue}${this.formNeomoonCampaign.adNumCampaign}${this.formNeomoonCampaign.estrutura}${this.formNeomoonCampaign.estrategiaLance}${this.formNeomoonCampaign.nomeCampanha}`;
+      }
+
+      const noProhibited = !PROHIBITED_TEST.test(combined);
+      return Boolean(requiredFilled && noProhibited);
+    },
+    previewNeomoonCampaign() {
+      const cleanValue = (value) => String(value || "").replace(/[\s-]/g, "").toUpperCase();
+      const withToken = (value) => {
+        const val = cleanValue(value);
+        return val ? `[${val}]` : "";
+      };
+      const formatDate = (iso) => {
+        if (!iso) return "";
+        const [y,m,d] = iso.split('-');
+        if (!y || !m || !d) return "";
+        return `${d}/${m}/${y}`;
+      };
+
+      const redeToken = this.formNeomoonCampaign.rede === "Facebook"
+        ? "FB"
+        : (this.formNeomoonCampaign.rede === "TikTok" ? "TTK" : "Google");
+      const bmOrPosicionamento = this.formNeomoonCampaign.rede === "Facebook"
+        ? this.formNeomoonCampaign.bm
+        : (this.formNeomoonCampaign.rede === "TikTok" ? "N/A" : this.formNeomoonCampaign.posicionamento);
+      const funilValue = this.formNeomoonCampaign.funil === "OUTRO"
+        ? this.formNeomoonCampaign.funilOutro
+        : this.formNeomoonCampaign.funil;
+
+      const parts = [
+        withToken(this.formNeomoonCampaign.siglaGestor),
+        withToken(redeToken),
+        withToken(bmOrPosicionamento),
+        withToken(this.formNeomoonCampaign.ca),
+        withToken(this.formNeomoonCampaign.oferta),
+        withToken(funilValue),
+        withToken("US"),
+        withToken(this.formNeomoonCampaign.adNumCampaign),
+        withToken(this.formNeomoonCampaign.estrutura),
+        withToken(this.formNeomoonCampaign.estrategiaLance),
+        withToken(this.formNeomoonCampaign.nomeCampanha),
+        withToken(formatDate(this.formNeomoonCampaign.dataDiaUmRaw)),
+      ];
+
+      return parts.join("");
+    },
+    isValidNeomoonAds() {
+      const copyValue = this.formNeomoonAds.copy === "OUTRO"
+        ? this.formNeomoonAds.copyOutro
+        : (this.formNeomoonAds.copy === "NAO_INFORMADO" ? "XX" : this.formNeomoonAds.copy);
+      const editorValue = this.formNeomoonAds.editor === "OUTRO"
+        ? this.formNeomoonAds.editorOutro
+        : this.formNeomoonAds.editor;
+
+      const requiredFilled = this.formNeomoonAds.sequencia !== null
+        && this.formNeomoonAds.sequencia !== undefined
+        && copyValue
+        && this.formNeomoonAds.redeTrafego
+        && this.formNeomoonAds.oferta
+        && this.formNeomoonAds.adNum
+        && this.formNeomoonAds.angulo
+        && this.formNeomoonAds.hook
+        && this.formNeomoonAds.avatar
+        && this.formNeomoonAds.avatarTipo
+        && this.formNeomoonAds.tipoArquivo
+        && this.formNeomoonAds.formato;
+      const combined = `${copyValue}${this.formNeomoonAds.redeTrafego}${this.formNeomoonAds.oferta}${this.formNeomoonAds.adNum}${this.formNeomoonAds.angulo}${this.formNeomoonAds.hook}${this.formNeomoonAds.avatar}${this.formNeomoonAds.avatarTipo}${this.formNeomoonAds.tipoArquivo}${this.formNeomoonAds.formato}${editorValue}`;
+      const noProhibited = !PROHIBITED_TEST.test(combined);
+      const sequenciaOk = this.formNeomoonAds.sequencia !== null && this.formNeomoonAds.sequencia !== undefined && !isNaN(Number(this.formNeomoonAds.sequencia));
+      return Boolean(requiredFilled && noProhibited && sequenciaOk);
+    },
+    previewNeomoonAds() {
+      const cleanValue = (value) => String(value || "").replace(/[\s-]/g, "").toUpperCase();
+      const withToken = (value) => {
+        const val = cleanValue(value);
+        return val ? `[${val}]` : "";
+      };
+      const sequenciaValue = this.formNeomoonAds.sequencia !== null && this.formNeomoonAds.sequencia !== undefined ? String(this.formNeomoonAds.sequencia) : "";
+      const redeDisplay = this.formNeomoonAds.redeTrafego === "Google" ? "YT" : (this.formNeomoonAds.redeTrafego || "");
+      const avatarComplete = this.formNeomoonAds.avatar
+        ? `${cleanValue(this.formNeomoonAds.avatar)}.${cleanValue(this.formNeomoonAds.avatarTipo)}`
+        : "";
+      const copyValue = this.formNeomoonAds.copy === "OUTRO"
+        ? this.formNeomoonAds.copyOutro
+        : (this.formNeomoonAds.copy === "NAO_INFORMADO" ? "XX" : this.formNeomoonAds.copy);
+      const editorRaw = this.formNeomoonAds.editor === "OUTRO"
+        ? this.formNeomoonAds.editorOutro
+        : this.formNeomoonAds.editor;
+      const editorValue = cleanValue(editorRaw) || "XX";
+
+      const parts = [
+        withToken(sequenciaValue),
+        withToken(copyValue),
+        withToken(redeDisplay),
+        withToken(this.formNeomoonAds.oferta),
+        withToken(this.formNeomoonAds.adNum),
+        withToken(this.formNeomoonAds.angulo),
+        withToken(this.formNeomoonAds.hook),
+        withToken(avatarComplete),
+        withToken(this.formNeomoonAds.tipoArquivo),
+        withToken(this.formNeomoonAds.formato),
+        withToken(editorValue),
+      ];
+
       return parts.join("");
     },
   },
@@ -233,6 +421,30 @@ createApp({
         .toUpperCase();
       this.formAds[field] = sanitized;
     },
+    enforceUpperNeomoonCampaign(field) {
+      const current = this.formNeomoonCampaign[field] ?? "";
+      const sanitized = String(current)
+        .replace(/\s+/g, "")
+        .replace(PROHIBITED_REGEX, "")
+        .toUpperCase();
+      this.formNeomoonCampaign[field] = sanitized;
+    },
+    enforceUpperTwoLettersNeomoonGestor() {
+      const current = this.formNeomoonCampaign.siglaGestor ?? "";
+      const sanitized = String(current)
+        .replace(/[^a-zA-Z]/g, "")
+        .toUpperCase()
+        .slice(0, 2);
+      this.formNeomoonCampaign.siglaGestor = sanitized;
+    },
+    enforceUpperNeomoonAds(field) {
+      const current = this.formNeomoonAds[field] ?? "";
+      const sanitized = String(current)
+        .replace(/\s+/g, "")
+        .replace(PROHIBITED_REGEX, "")
+        .toUpperCase();
+      this.formNeomoonAds[field] = sanitized;
+    },
     async copyToClipboard() {
       try {
         await navigator.clipboard.writeText(this.preview);
@@ -247,6 +459,28 @@ createApp({
     async copyAds() {
       try {
         await navigator.clipboard.writeText(this.previewAds);
+        this.showToast("Texto copiado com sucesso!");
+        this.copied = true;
+        setTimeout(() => (this.copied = false), 1500);
+      } catch (e) {
+        console.error(e);
+        this.showToast("Erro ao copiar texto", "error");
+      }
+    },
+    async copyNeomoonCampaign() {
+      try {
+        await navigator.clipboard.writeText(this.previewNeomoonCampaign);
+        this.showToast("Texto copiado com sucesso!");
+        this.copied = true;
+        setTimeout(() => (this.copied = false), 1500);
+      } catch (e) {
+        console.error(e);
+        this.showToast("Erro ao copiar texto", "error");
+      }
+    },
+    async copyNeomoonAds() {
+      try {
+        await navigator.clipboard.writeText(this.previewNeomoonAds);
         this.showToast("Texto copiado com sucesso!");
         this.copied = true;
         setTimeout(() => (this.copied = false), 1500);
@@ -405,39 +639,39 @@ createApp({
       if (val === 'TikTok') {
         this.form.posicionamento = 'N/A';
       }
+    },
+    'formNeomoonCampaign.rede'(val) {
+      const opts = this.neomoonPosicionamentosOptions;
+      if (!opts.includes(this.formNeomoonCampaign.posicionamento)) {
+        this.formNeomoonCampaign.posicionamento = opts[0] || '';
+      }
+      if (val === 'Google') {
+        this.formNeomoonCampaign.bm = '';
+      }
+      if (val === 'Facebook') {
+        this.formNeomoonCampaign.posicionamento = '';
+      }
+      if (val === 'TikTok') {
+        this.formNeomoonCampaign.posicionamento = 'N/A';
+      }
+    },
+    'formNeomoonCampaign.funil'(val) {
+      if (val !== 'OUTRO') {
+        this.formNeomoonCampaign.funilOutro = '';
+      }
+    },
+    'formNeomoonAds.copy'(val) {
+      if (val !== 'OUTRO') {
+        this.formNeomoonAds.copyOutro = '';
+      }
+    },
+    'formNeomoonAds.editor'(val) {
+      if (val !== 'OUTRO') {
+        this.formNeomoonAds.editorOutro = '';
+      }
     }
   }
 }).mount('#app');
 
 
-// Ajuste responsivo para caber 100% na viewport sem scroll
-(function() {
-  function resizeToFit() {
-    const container = document.querySelector('.container');
-    const footer = document.querySelector('.site-footer');
-    if (!container) return;
-
-    // Reset scale antes de medir
-    container.style.transform = 'scale(1)';
-
-    const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
-
-    // Altura ocupada pelo conteúdo + footer (se existir)
-    const containerRect = container.getBoundingClientRect();
-    const footerRect = footer ? footer.getBoundingClientRect() : { height: 0 };
-    const totalHeight = containerRect.height + (footerRect.height || 0);
-
-    const heightScale = viewportHeight / totalHeight;
-    const widthScale = viewportWidth / containerRect.width;
-
-    // Usar o menor scale para garantir que nada extrapole
-    const scale = Math.min(1, heightScale, widthScale);
-
-    container.style.transform = `scale(${scale})`;
-    // Não escalonar o footer fixo
-  }
-
-  window.addEventListener('load', resizeToFit);
-  window.addEventListener('resize', resizeToFit);
-})();
+// Removido ajuste por escala para permitir scroll natural da página.

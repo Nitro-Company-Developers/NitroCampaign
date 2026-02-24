@@ -24,15 +24,20 @@
       </div>
       <img src="assets/logo.png" alt="Logo do sistema" style="display:block;margin:0 auto;max-height:80px;width:auto;"/>
       <br><br>
-      <p  class="subtitle">Padronize nomes de campanhas (Google/Facebook) com segurança e consistência.</p>
+      <p class="subtitle">Padronize nomes de campanhas e anúncios com segurança e consistência.</p>
     </header>
+
+    <nav class="tabs animate-slide-in-right">
+      <button :class="{ active: activeCompany==='nitro' }" @click="activeCompany='nitro'">Nitro Company</button>
+      <button :class="{ active: activeCompany==='neomoon' }" @click="activeCompany='neomoon'">Neomoon</button>
+    </nav>
 
     <nav class="tabs animate-slide-in-right">
       <button :class="{ active: activeTab==='campanhas' }" @click="activeTab='campanhas'">Campanhas</button>
       <button :class="{ active: activeTab==='anuncios' }" @click="activeTab='anuncios'">Anúncios</button>
     </nav>
 
-    <main class="grid" v-if="activeTab==='campanhas'">
+    <main class="grid" v-if="activeCompany==='nitro' && activeTab==='campanhas'">
       <section class="card">
         <h2 class="card-title">Configuração</h2>
         <form class="form" @submit.prevent>
@@ -205,7 +210,7 @@
       </section>
     </main>
 
-    <main class="grid" v-if="activeTab==='anuncios'">
+    <main class="grid" v-if="activeCompany==='nitro' && activeTab==='anuncios'">
       <section class="card">
         <h2 class="card-title">Configuração de Anúncio</h2>
         <form class="form" @submit.prevent>
@@ -225,7 +230,7 @@
               <span class="tooltip-content">Tipo de copy/versão do anúncio (ex: MG, AN, AC, MC)</span>
             </label>
             <select id="copy" v-model="formAds.copy">
-              <option value="">Selecione o copy</option>
+              <option value="NAO_INFORMADO">Não informado (XX)</option>
               <option value="MG">Matheus Ganguilhet</option>
               <option value="AN">Antônio</option>
               <option value="AC">André Victor</option>
@@ -343,6 +348,370 @@
           <p>• O sistema remove automaticamente espaços e hífens antes de gerar o nome final</p>
           <p>• Campo AD aceita letras e números (ex: AD1, AD11, ADFB76)</p>
           <p>• Campo Sequência aceita qualquer valor numérico (ex: 1, 1000, 100000.12345)</p>
+        </div>
+      </section>
+    </main>
+
+    <main class="grid" v-if="activeCompany==='neomoon' && activeTab==='campanhas'">
+      <section class="card">
+        <h2 class="card-title">Configuração (Neomoon)</h2>
+        <form class="form" @submit.prevent>
+          <div class="field two-col">
+            <label for="nmSiglaGestor" class="field-with-tooltip">
+              Gestor
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Identificação do gestor responsável pela campanha (ex: ZO, RL, FS, LP)</span>
+            </label>
+            <input id="nmSiglaGestor" type="text" v-model.trim="formNeomoonCampaign.siglaGestor" @input="enforceUpperTwoLettersNeomoonGestor" placeholder="Ex: RL" maxlength="2" autocomplete="off">
+          </div>
+
+          <div class="field two-col">
+            <label for="nmRede" class="field-with-tooltip">
+              Rede
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Plataforma de tráfego onde a campanha será veiculada (Google, Facebook ou TikTok)</span>
+            </label>
+            <select id="nmRede" v-model="formNeomoonCampaign.rede">
+              <option v-for="opt in redes" :key="`nm-rede-${opt}`" :value="opt">{{ opt }}</option>
+            </select>
+          </div>
+
+          <div class="field two-col" v-if="formNeomoonCampaign.rede === 'Google'">
+            <label for="nmPosicionamento" class="field-with-tooltip">
+              Posicionamento
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Tipo de posicionamento no Google: YT (YouTube), Display ou Search</span>
+            </label>
+            <select id="nmPosicionamento" v-model="formNeomoonCampaign.posicionamento">
+              <option v-for="opt in neomoonPosicionamentosOptions" :key="`nm-pos-${opt}`" :value="opt">{{ opt }}</option>
+            </select>
+          </div>
+
+          <div class="field two-col" v-if="formNeomoonCampaign.rede === 'TikTok'">
+            <label for="nmPosicionamentoTtk" class="field-with-tooltip">
+              Posicionamento
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Para TikTok o posicionamento é sempre N/A</span>
+            </label>
+            <select id="nmPosicionamentoTtk" v-model="formNeomoonCampaign.posicionamento" disabled>
+              <option value="N/A">N/A</option>
+            </select>
+          </div>
+
+          <div class="field two-col" v-if="formNeomoonCampaign.rede === 'Facebook'">
+            <label for="nmBm" class="field-with-tooltip">
+              BM
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Business Manager - identificação da conta de negócios do Facebook</span>
+            </label>
+            <input id="nmBm" type="text" v-model.trim="formNeomoonCampaign.bm" @input="enforceUpperNeomoonCampaign('bm')" placeholder="DIDA" maxlength="20" autocomplete="off">
+          </div>
+
+          <div class="field two-col">
+            <label for="nmCa" class="field-with-tooltip">
+              CA
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Conta de anúncio responsável pela campanha (ex: CA01, NEXUS)</span>
+            </label>
+            <input id="nmCa" type="text" v-model.trim="formNeomoonCampaign.ca" @input="enforceUpperNeomoonCampaign('ca')" placeholder="CA01" maxlength="10" autocomplete="off">
+          </div>
+
+          <div class="field two-col">
+            <label for="nmOferta" class="field-with-tooltip">
+              Oferta (código)
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Código da oferta promocionada (ex: BD04, BP02, BP03)</span>
+            </label>
+            <input id="nmOferta" type="text" v-model.trim="formNeomoonCampaign.oferta" @input="enforceUpperNeomoonCampaign('oferta')" placeholder="BD04, BP02..." maxlength="12" autocomplete="off">
+          </div>
+
+          <div class="field two-col">
+            <label for="nmFunil" class="field-with-tooltip">
+              Funil
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Funil da oferta (wrinkles, dark spots, etc)</span>
+            </label>
+            <select id="nmFunil" v-model="formNeomoonCampaign.funil">
+              <option value="">Selecione o funil</option>
+              <option value="WRINKLES">Wrinkles</option>
+              <option value="DARKSPOTS">Darkspots</option>
+              <option value="REDNESS">Redness</option>
+              <option value="OUTRO">Outro</option>
+            </select>
+          </div>
+
+          <div class="field two-col" v-if="formNeomoonCampaign.funil === 'OUTRO'">
+            <label for="nmFunilOutro" class="field-with-tooltip">
+              Funil (Outro)
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Informe manualmente o funil quando selecionar a opção Outro</span>
+            </label>
+            <input id="nmFunilOutro" type="text" v-model.trim="formNeomoonCampaign.funilOutro" @input="enforceUpperNeomoonCampaign('funilOutro')" placeholder="Digite o funil" maxlength="20" autocomplete="off">
+          </div>
+
+          <div class="field two-col">
+            <label for="nmPais" class="field-with-tooltip">
+              País
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Padrão definido para simplificação da engenharia de dados</span>
+            </label>
+            <input id="nmPais" type="text" value="US" disabled>
+          </div>
+
+          <div class="field two-col">
+            <label for="nmAdNumCampaign" class="field-with-tooltip">
+              AD
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Código do anúncio - aceita letras e números (ex: AD1, AD11, ADFB76)</span>
+            </label>
+            <input id="nmAdNumCampaign" type="text" v-model.trim="formNeomoonCampaign.adNumCampaign" @input="enforceUpperNeomoonCampaign('adNumCampaign')" placeholder="AD11" maxlength="20" autocomplete="off">
+          </div>
+
+          <div class="field two-col">
+            <label for="nmEstrutura" class="field-with-tooltip">
+              Estrutura
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Estrutura da campanha para a Neomoon</span>
+            </label>
+            <select id="nmEstrutura" v-model="formNeomoonCampaign.estrutura">
+              <option value="">Selecione uma estrutura</option>
+              <option value="ABO">ABO</option>
+              <option value="CBO">CBO</option>
+            </select>
+          </div>
+
+          <div class="field two-col">
+            <label for="nmEstrategiaLance" class="field-with-tooltip">
+              Estratégia de Lance
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Estratégia de otimização (BID, CPA Desejado ou Max)</span>
+            </label>
+            <select id="nmEstrategiaLance" v-model="formNeomoonCampaign.estrategiaLance">
+              <option value="">Selecione a estratégia</option>
+              <option value="BID">BID</option>
+              <option value="CPA_DESEJADO">CPA Desejado</option>
+              <option value="MAX">Max</option>
+            </select>
+          </div>
+
+          <div class="field two-col">
+            <label for="nmNomeCampanha" class="field-with-tooltip">
+              Nome da Campanha
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Nome identificador da campanha (ex: ASHE01, CAMPAIGN02)</span>
+            </label>
+            <input id="nmNomeCampanha" type="text" v-model.trim="formNeomoonCampaign.nomeCampanha" @input="enforceUpperNeomoonCampaign('nomeCampanha')" placeholder="ASHE01" maxlength="30" autocomplete="off">
+          </div>
+
+          <div class="field two-col">
+            <label for="nmDataDiaUm" class="field-with-tooltip">
+              Data do dia 1
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Data do primeiro dia da campanha (formato: dd/mm/yyyy)</span>
+            </label>
+            <input id="nmDataDiaUm" type="date" v-model="formNeomoonCampaign.dataDiaUmRaw" autocomplete="off">
+          </div>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">Pré-visualização</h2>
+        <div class="preview" :class="{ invalid: !isValidNeomoonCampaign }">
+          <code class="preview-text">{{ previewNeomoonCampaign }}</code>
+          <div class="preview-actions">
+            <button class="btn" :disabled="!isValidNeomoonCampaign" @click="copyNeomoonCampaign">Copiar</button>
+            <span v-if="copied" style="color:#22c55e;font-weight:600">✅ Copiado</span>
+          </div>
+          <p v-if="!isValidNeomoonCampaign" class="hint">Preencha os campos obrigatórios e remova caracteres proibidos.</p>
+        </div>
+
+        <div class="helper">
+          <h3>Template de Campanha (Neomoon)</h3>
+          <p>Formato: <strong>[GESTOR][REDE][BM/POSICIONAMENTO][CA][OFERTA][FUNIL][US][AD][ESTRUTURA][ESTRATÉGIA_LANCE][NOME_DA_CAMPANHA][DATA_DIA_1]</strong></p>
+          <p>Exemplo: <em>[RL][FB][DIDA][CA01][BP03][WRINKLES][US][AD12][ABO][BID][ASHE01][17/09/2024]</em></p>
+          <p style="margin-top:8px"><strong>Observações:</strong></p>
+          <p>• O sistema remove automaticamente espaços e hífens antes de gerar o nome final</p>
+          <p>• País fixo em US para simplificação da engenharia de dados</p>
+        </div>
+      </section>
+    </main>
+
+    <main class="grid" v-if="activeCompany==='neomoon' && activeTab==='anuncios'">
+      <section class="card">
+        <h2 class="card-title">Configuração de Anúncio (Neomoon)</h2>
+        <form class="form" @submit.prevent>
+          <div class="field two-col">
+            <label for="nmSequencia" class="field-with-tooltip">
+              Sequência
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Número sequencial do anúncio</span>
+            </label>
+            <input id="nmSequencia" type="number" step="any" v-model.number="formNeomoonAds.sequencia" placeholder="325" autocomplete="off">
+          </div>
+
+          <div class="field two-col">
+            <label for="nmCopy" class="field-with-tooltip">
+              Copy
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Tipo de copy/versão do anúncio (ex: MG, AN, AC, MC)</span>
+            </label>
+            <select id="nmCopy" v-model="formNeomoonAds.copy">
+              <option value="NAO_INFORMADO">Não informado (XX)</option>
+              <option value="MG">Matheus Ganguilhet</option>
+              <option value="AN">Antônio</option>
+              <option value="AC">André Victor</option>
+              <option value="MC">Maria Candida</option>
+              <option value="OUTRO">Outro</option>
+            </select>
+          </div>
+
+          <div class="field two-col" v-if="formNeomoonAds.copy === 'OUTRO'">
+            <label for="nmCopyOutro" class="field-with-tooltip">
+              Copy (Outro)
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Informe manualmente o copy quando selecionar a opção Outro</span>
+            </label>
+            <input id="nmCopyOutro" type="text" v-model.trim="formNeomoonAds.copyOutro" @input="enforceUpperNeomoonAds('copyOutro')" placeholder="Digite o copy" maxlength="20" autocomplete="off">
+          </div>
+
+          <div class="field two-col">
+            <label for="nmRedeTrafego" class="field-with-tooltip">
+              Rede de Tráfego
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Plataforma onde o anúncio será veiculado (Facebook, Google ou TikTok)</span>
+            </label>
+            <select id="nmRedeTrafego" v-model="formNeomoonAds.redeTrafego">
+              <option v-for="opt in redeTrafegoOpts" :key="`nm-ads-rede-${opt.value}`" :value="opt.value">{{ opt.label }}</option>
+            </select>
+          </div>
+
+          <div class="field two-col">
+            <label for="nmOfertaAd" class="field-with-tooltip">
+              Oferta
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Código da oferta promocionada (ex: BP02, BD04)</span>
+            </label>
+            <input id="nmOfertaAd" type="text" v-model.trim="formNeomoonAds.oferta" @input="enforceUpperNeomoonAds('oferta')" placeholder="BP02..." maxlength="12" autocomplete="off">
+          </div>
+
+          <div class="field two-col">
+            <label for="nmAdNum" class="field-with-tooltip">
+              AD
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Código do anúncio - aceita letras e números (ex: AD1, AD11, ADFB76)</span>
+            </label>
+            <input id="nmAdNum" type="text" v-model.trim="formNeomoonAds.adNum" @input="enforceUpperNeomoonAds('adNum')" placeholder="AD11" maxlength="20" autocomplete="off">
+          </div>
+
+          <div class="field two-col">
+            <label for="nmAngulo" class="field-with-tooltip">
+              Ângulo
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Ângulo criativo do anúncio (substitui variação)</span>
+            </label>
+            <input id="nmAngulo" type="text" v-model.trim="formNeomoonAds.angulo" @input="enforceUpperNeomoonAds('angulo')" placeholder="ANG01" maxlength="20" autocomplete="off">
+          </div>
+
+          <div class="field two-col">
+            <label for="nmHook" class="field-with-tooltip">
+              Hook
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Hook do anúncio (ex: H01, H02, H03)</span>
+            </label>
+            <input id="nmHook" type="text" v-model.trim="formNeomoonAds.hook" @input="enforceUpperNeomoonAds('hook')" placeholder="H01" maxlength="10" autocomplete="off">
+          </div>
+
+          <div class="field two-col">
+            <label for="nmAvatar" class="field-with-tooltip">
+              Avatar
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Avatar do anúncio (ex: A01, A02, A03)</span>
+            </label>
+            <input id="nmAvatar" type="text" v-model.trim="formNeomoonAds.avatar" @input="enforceUpperNeomoonAds('avatar')" placeholder="A02" maxlength="10" autocomplete="off">
+          </div>
+
+          <div class="field two-col">
+            <label for="nmAvatarTipo" class="field-with-tooltip">
+              Tipo de Avatar
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Tipo de avatar usado no criativo</span>
+            </label>
+            <select id="nmAvatarTipo" v-model="formNeomoonAds.avatarTipo">
+              <option value="IA">IA</option>
+              <option value="ATOR">Ator</option>
+            </select>
+          </div>
+
+          <div class="field two-col">
+            <label for="nmTipoArquivo" class="field-with-tooltip">
+              Tipo de Arquivo
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Tipo de arquivo criativo</span>
+            </label>
+            <select id="nmTipoArquivo" v-model="formNeomoonAds.tipoArquivo">
+              <option value="">Selecione o tipo</option>
+              <option value="IMAGEM">Imagem</option>
+              <option value="VIDEO">Vídeo</option>
+            </select>
+          </div>
+
+          <div class="field two-col">
+            <label for="nmFormato" class="field-with-tooltip">
+              Formato
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Formato aberto para cadastro inicial de novos padrões</span>
+            </label>
+            <input id="nmFormato" type="text" v-model.trim="formNeomoonAds.formato" @input="enforceUpperNeomoonAds('formato')" placeholder="UGC, STORY, FEED..." maxlength="30" autocomplete="off">
+          </div>
+
+          <div class="field two-col">
+            <label for="nmEditor" class="field-with-tooltip">
+              Editor
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Editor responsável pelo anúncio (se não informado, será usado XX)</span>
+            </label>
+            <select id="nmEditor" v-model="formNeomoonAds.editor">
+              <option value="">Não informado (XX)</option>
+              <option value="AH">Alexandre Husky</option>
+              <option value="CB">Cris Berriel</option>
+              <option value="LA">Lucas Andreli</option>
+              <option value="IC">Isabela Barreto</option>
+              <option value="DM">Douglas Marcelino</option>
+              <option value="MB">Matheus Boturi</option>
+              <option value="AM">Antonio Mike</option>
+              <option value="OUTRO">Outro</option>
+            </select>
+          </div>
+
+          <div class="field two-col" v-if="formNeomoonAds.editor === 'OUTRO'">
+            <label for="nmEditorOutro" class="field-with-tooltip">
+              Editor (Outro)
+              <span class="tooltip-icon" @click="toggleTooltip">?</span>
+              <span class="tooltip-content">Informe manualmente o editor quando selecionar a opção Outro</span>
+            </label>
+            <input id="nmEditorOutro" type="text" v-model.trim="formNeomoonAds.editorOutro" @input="enforceUpperNeomoonAds('editorOutro')" placeholder="Digite o editor" maxlength="20" autocomplete="off">
+          </div>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">Pré-visualização</h2>
+        <div class="preview" :class="{ invalid: !isValidNeomoonAds }">
+          <code class="preview-text">{{ previewNeomoonAds }}</code>
+          <div class="preview-actions">
+            <button class="btn" :disabled="!isValidNeomoonAds" @click="copyNeomoonAds">Copiar</button>
+            <span v-if="copied" style="color:#22c55e;font-weight:600">✅ Copiado</span>
+          </div>
+          <p v-if="!isValidNeomoonAds" class="hint">Preencha os campos obrigatórios e remova caracteres proibidos.</p>
+        </div>
+
+        <div class="helper">
+          <h3>Template de Anúncio (Neomoon)</h3>
+          <p>Formato: <strong>[SEQUENCIA][COPY][REDE][OFERTA][AD][ANGULO][HOOK][AVATAR.TIPO][TIPO_ARQUIVO][FORMATO][EDITOR]</strong></p>
+          <p>Exemplo: <em>[325][AN][FB][BP03][AD11][ANG01][H01][A02.IA][VIDEO][UGC][MB]</em></p>
+          <p style="margin-top:8px"><strong>Observações:</strong></p>
+          <p>• O sistema remove automaticamente espaços e hífens antes de gerar o nome final</p>
+          <p>• Formato permanece aberto para cadastro de novos padrões inicialmente</p>
         </div>
       </section>
     </main>
