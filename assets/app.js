@@ -16,6 +16,12 @@ createApp({
         { label: 'Google', value: 'Google' },
         { label: 'TikTok', value: 'TTK' },
       ],
+      neomoonAdsRedeTrafegoOpts: [
+        { label: 'Facebook', value: 'FB' },
+        { label: 'Youtube', value: 'YT' },
+        { label: 'Google', value: 'GOOGLE' },
+        { label: 'Taboola', value: 'TABOOLA' },
+      ],
       showBrackets: true,
       form: {
         siglaGestor: "",
@@ -66,14 +72,13 @@ createApp({
         redeTrafego: "FB",
         oferta: "",
         adNum: "",
-        angulo: "",
         hook: "",
+        tipoCampanha: "",
         avatar: "",
         avatarTipo: "IA",
         tipoArquivo: "",
         formato: "",
-        editor: "",
-        editorOutro: "",
+        editor: "N/A",
       },
       copied: false,
     };
@@ -337,10 +342,8 @@ createApp({
       if (!this.formNeomoonAds) return false;
       const copyValue = this.formNeomoonAds.copy === "OUTRO"
         ? this.formNeomoonAds.copyOutro
-        : (this.formNeomoonAds.copy === "NAO_INFORMADO" ? "XX" : this.formNeomoonAds.copy);
-      const editorValue = this.formNeomoonAds.editor === "OUTRO"
-        ? this.formNeomoonAds.editorOutro
-        : this.formNeomoonAds.editor;
+        : this.formNeomoonAds.copy;
+      const editorValue = this.formNeomoonAds.editor;
 
       const requiredFilled = this.formNeomoonAds.sequencia !== null
         && this.formNeomoonAds.sequencia !== undefined
@@ -348,13 +351,14 @@ createApp({
         && this.formNeomoonAds.redeTrafego
         && this.formNeomoonAds.oferta
         && this.formNeomoonAds.adNum
-        && this.formNeomoonAds.angulo
         && this.formNeomoonAds.hook
+        && this.formNeomoonAds.tipoCampanha
         && this.formNeomoonAds.avatar
         && this.formNeomoonAds.avatarTipo
         && this.formNeomoonAds.tipoArquivo
-        && this.formNeomoonAds.formato;
-      const combined = `${copyValue}${this.formNeomoonAds.redeTrafego}${this.formNeomoonAds.oferta}${this.formNeomoonAds.adNum}${this.formNeomoonAds.angulo}${this.formNeomoonAds.hook}${this.formNeomoonAds.avatar}${this.formNeomoonAds.avatarTipo}${this.formNeomoonAds.tipoArquivo}${this.formNeomoonAds.formato}${editorValue}`;
+        && this.formNeomoonAds.formato
+        && editorValue;
+      const combined = `${copyValue}${this.formNeomoonAds.redeTrafego}${this.formNeomoonAds.oferta}${this.formNeomoonAds.adNum}${this.formNeomoonAds.hook}${this.formNeomoonAds.avatar}${this.formNeomoonAds.avatarTipo}${this.formNeomoonAds.tipoCampanha}${this.formNeomoonAds.tipoArquivo}${this.formNeomoonAds.formato}${editorValue}`;
       const noProhibited = !PROHIBITED_TEST.test(combined);
       const sequenciaOk = this.formNeomoonAds.sequencia !== null && this.formNeomoonAds.sequencia !== undefined && !isNaN(Number(this.formNeomoonAds.sequencia));
       return Boolean(requiredFilled && noProhibited && sequenciaOk);
@@ -367,27 +371,23 @@ createApp({
         return val ? `[${val}]` : "";
       };
       const sequenciaValue = this.formNeomoonAds.sequencia !== null && this.formNeomoonAds.sequencia !== undefined ? String(this.formNeomoonAds.sequencia) : "";
-      const redeDisplay = this.formNeomoonAds.redeTrafego === "Google" ? "YT" : (this.formNeomoonAds.redeTrafego || "");
       const avatarComplete = this.formNeomoonAds.avatar
         ? `${cleanValue(this.formNeomoonAds.avatar)}.${cleanValue(this.formNeomoonAds.avatarTipo)}`
         : "";
       const copyValue = this.formNeomoonAds.copy === "OUTRO"
         ? this.formNeomoonAds.copyOutro
-        : (this.formNeomoonAds.copy === "NAO_INFORMADO" ? "XX" : this.formNeomoonAds.copy);
-      const editorRaw = this.formNeomoonAds.editor === "OUTRO"
-        ? this.formNeomoonAds.editorOutro
-        : this.formNeomoonAds.editor;
-      const editorValue = cleanValue(editorRaw) || "XX";
+        : this.formNeomoonAds.copy;
+      const editorValue = cleanValue(this.formNeomoonAds.editor);
 
       const parts = [
         withToken(sequenciaValue),
         withToken(copyValue),
-        withToken(redeDisplay),
+        withToken(this.formNeomoonAds.redeTrafego),
         withToken(this.formNeomoonAds.oferta),
         withToken(this.formNeomoonAds.adNum),
-        withToken(this.formNeomoonAds.angulo),
         withToken(this.formNeomoonAds.hook),
         withToken(avatarComplete),
+        withToken(this.formNeomoonAds.tipoCampanha),
         withToken(this.formNeomoonAds.tipoArquivo),
         withToken(this.formNeomoonAds.formato),
         withToken(editorValue),
@@ -671,11 +671,6 @@ createApp({
     'formNeomoonAds.copy'(val) {
       if (val !== 'OUTRO') {
         this.formNeomoonAds.copyOutro = '';
-      }
-    },
-    'formNeomoonAds.editor'(val) {
-      if (val !== 'OUTRO') {
-        this.formNeomoonAds.editorOutro = '';
       }
     }
   }
