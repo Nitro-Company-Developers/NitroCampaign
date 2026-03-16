@@ -26,3 +26,4 @@ Checklist de Desenvolvimento
  Criar pré-visualização dinâmica do nome gerado.
  Incluir toggle para exibir tokens com [ ] ou sem colchetes.
  Documentar o funcionamento e criar um manual simples de uso.
+ Teste
