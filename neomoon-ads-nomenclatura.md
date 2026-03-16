@@ -108,13 +108,15 @@ Este guia define os campos usados para nomear vídeos e imagens de anúncios, co
 ### Campo: Editor
 - **Tipo de campo:** Selecionável.
 - **Itens:**
+  - Henrique
+  - Varsi
   - Cris
   - Boturi
   - Jeff
   - Filipe
   - N/A
 - **Descrição:** Nome do editor responsável pelo criativo.
-- **Observação:** N/A para anúncios que são apenas imagem (sem edição de vídeo).
+- **Observação:** N/A para anúncios que são apenas imagem (sem edição de vídeo). Internamente, o valor é armazenado sem a barra (`NA`) para manter compatibilidade com as regras de caracteres permitidos.
 
 ## Tabela Resumida
 
@@ -131,4 +133,4 @@ Este guia define os campos usados para nomear vídeos e imagens de anúncios, co
 | Tipo de Avatar   | Selecionável | IA, Ator, Influencer, Micro Celeb, Celebridade, N/A      | Classificação do avatar                                 |
 | Tipo de Arquivo  | Selecionável | Imagem, Vídeo                                            | Tipo do criativo                                        |
 | Formato          | Escrito      | UGC, REELS, ANIMAÇÃO, REPORTAGEM, COMPARAÇÃO, AXD        | Formato/padrão do criativo                              |
-| Editor           | Selecionável | Cris, Boturi, Jeff, Filipe, N/A                          | Editor responsável                                      |
+| Editor           | Selecionável | Henrique, Varsi, Cris, Boturi, Jeff, Filipe, N/A         | Editor responsável                                      |

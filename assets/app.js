@@ -78,7 +78,7 @@ createApp({
         avatarTipo: "IA",
         tipoArquivo: "",
         formato: "",
-        editor: "N/A",
+        editor: "NA",
       },
       copied: false,
     };
@@ -343,7 +343,18 @@ createApp({
       const copyValue = this.formNeomoonAds.copy === "OUTRO"
         ? this.formNeomoonAds.copyOutro
         : this.formNeomoonAds.copy;
-      const editorValue = this.formNeomoonAds.editor;
+      // Saneia campos texto para validação, evitando caracteres proibidos em combined
+      const sanitizeText = (value) => {
+        return String(value || "")
+          .replace(/\s+/g, "")
+          .replace(PROHIBITED_REGEX, "")
+          .toUpperCase();
+      };
+
+      const editorRaw = this.formNeomoonAds.editor;
+      const sanitizedEditorValue = editorRaw === "NA"
+        ? "NA"
+        : sanitizeText(editorRaw);
 
       const requiredFilled = this.formNeomoonAds.sequencia !== null
         && this.formNeomoonAds.sequencia !== undefined
@@ -357,8 +368,9 @@ createApp({
         && this.formNeomoonAds.avatarTipo
         && this.formNeomoonAds.tipoArquivo
         && this.formNeomoonAds.formato
-        && editorValue;
-      const combined = `${copyValue}${this.formNeomoonAds.redeTrafego}${this.formNeomoonAds.oferta}${this.formNeomoonAds.adNum}${this.formNeomoonAds.hook}${this.formNeomoonAds.avatar}${this.formNeomoonAds.avatarTipo}${this.formNeomoonAds.tipoCampanha}${this.formNeomoonAds.tipoArquivo}${this.formNeomoonAds.formato}${editorValue}`;
+        && sanitizedEditorValue;
+
+      const combined = `${sanitizeText(copyValue)}${sanitizeText(this.formNeomoonAds.redeTrafego)}${sanitizeText(this.formNeomoonAds.oferta)}${sanitizeText(this.formNeomoonAds.adNum)}${sanitizeText(this.formNeomoonAds.hook)}${sanitizeText(this.formNeomoonAds.avatar)}${sanitizeText(this.formNeomoonAds.avatarTipo)}${sanitizeText(this.formNeomoonAds.tipoCampanha)}${sanitizeText(this.formNeomoonAds.tipoArquivo)}${sanitizeText(this.formNeomoonAds.formato)}${sanitizedEditorValue}`;
       const noProhibited = !PROHIBITED_TEST.test(combined);
       const sequenciaOk = this.formNeomoonAds.sequencia !== null && this.formNeomoonAds.sequencia !== undefined && !isNaN(Number(this.formNeomoonAds.sequencia));
       return Boolean(requiredFilled && noProhibited && sequenciaOk);
@@ -377,7 +389,8 @@ createApp({
       const copyValue = this.formNeomoonAds.copy === "OUTRO"
         ? this.formNeomoonAds.copyOutro
         : this.formNeomoonAds.copy;
-      const editorValue = cleanValue(this.formNeomoonAds.editor);
+      const rawEditor = this.formNeomoonAds.editor;
+      const editorValue = cleanValue(rawEditor === "NA" ? "N/A" : rawEditor);
 
       const parts = [
         withToken(sequenciaValue),
