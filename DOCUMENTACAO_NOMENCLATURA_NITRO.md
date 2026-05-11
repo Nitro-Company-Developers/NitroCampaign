@@ -311,6 +311,7 @@ O anúncio é considerado **válido** quando:
 | `EP`  | Edvaldo Paletta |
 | `RB`  | Rhuan Briolli |
 | `AT`  | Adrian Trigueiro |
+| `JC`  | Julio Cesar |
 
 ### Copywriters (Anúncios)
 
